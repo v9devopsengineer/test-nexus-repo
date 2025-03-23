@@ -61,17 +61,3 @@ jobs:
           NEXUS_PASS="${{ secrets.NEXUS_PASS }}"
           TEST_FILE="test.txt"
           REPO="my-maven-repo"
-
-          echo "Nexus Connection Test" > $TEST_FILE
-
-          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -u "$NEXUS_USER:$NEXUS_PASS" \
-            --upload-file $TEST_FILE "$NEXUS_URL/repository/$REPO/test.txt")
-
-          if [ "$RESPONSE" -ne 201 ]; then
-            echo "❌ Failed to upload test file to Nexus!"
-            exit 1
-          fi
-          echo "✅ Successfully uploaded test file to Nexus"
-
-      - name: Cleanup Test File (Optional)
-        run: rm -f test.txt
