@@ -26,7 +26,7 @@ jobs:
 
       - name: Test Nexus Authentication
         run: |
-          NEXUS_URL="http://your-nexus-server:8081"
+          NEXUS_URL="http://128.24.25.235:8081"
           NEXUS_USER="${{ secrets.NEXUS_USER }}"
           NEXUS_PASS="${{ secrets.NEXUS_PASS }}"
 
@@ -40,7 +40,7 @@ jobs:
 
       - name: List Nexus Repositories
         run: |
-          NEXUS_URL="http://your-nexus-server:8081"
+          NEXUS_URL="http://128.24.25.235:8081"
           NEXUS_USER="${{ secrets.NEXUS_USER }}"
           NEXUS_PASS="${{ secrets.NEXUS_PASS }}"
 
@@ -56,7 +56,7 @@ jobs:
 
       - name: Validate Nexus Upload (Optional)
         run: |
-          NEXUS_URL="http://your-nexus-server:8081"
+          NEXUS_URL="http://128.24.25.235:8081"
           NEXUS_USER="${{ secrets.NEXUS_USER }}"
           NEXUS_PASS="${{ secrets.NEXUS_PASS }}"
           TEST_FILE="test.txt"
