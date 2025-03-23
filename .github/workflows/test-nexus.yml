@@ -1,0 +1,77 @@
+name: Test Nexus Connection
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  test-nexus:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Check if curl and jq are installed
+        run: |
+          if ! command -v curl &> /dev/null; then
+            echo "Error: curl is not installed!" >&2
+            exit 1
+          fi
+          if ! command -v jq &> /dev/null; then
+            echo "Error: jq is not installed!" >&2
+            exit 1
+          fi
+
+      - name: Test Nexus Authentication
+        run: |
+          NEXUS_URL="http://your-nexus-server:8081"
+          NEXUS_USER="${{ secrets.NEXUS_USER }}"
+          NEXUS_PASS="${{ secrets.NEXUS_PASS }}"
+
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -u "$NEXUS_USER:$NEXUS_PASS" "$NEXUS_URL/service/rest/v1/status")
+
+          if [ "$RESPONSE" -ne 200 ]; then
+            echo "❌ Nexus Authentication Failed!"
+            exit 1
+          fi
+          echo "✅ Nexus Authentication Successful"
+
+      - name: List Nexus Repositories
+        run: |
+          NEXUS_URL="http://your-nexus-server:8081"
+          NEXUS_USER="${{ secrets.NEXUS_USER }}"
+          NEXUS_PASS="${{ secrets.NEXUS_PASS }}"
+
+          RESPONSE=$(curl -s -u "$NEXUS_USER:$NEXUS_PASS" "$NEXUS_URL/service/rest/v1/repositories" | jq '.')
+
+          if [ -z "$RESPONSE" ]; then
+            echo "❌ Failed to retrieve repositories!"
+            exit 1
+          fi
+
+          echo "✅ Successfully retrieved Nexus repositories:"
+          echo "$RESPONSE"
+
+      - name: Validate Nexus Upload (Optional)
+        run: |
+          NEXUS_URL="http://your-nexus-server:8081"
+          NEXUS_USER="${{ secrets.NEXUS_USER }}"
+          NEXUS_PASS="${{ secrets.NEXUS_PASS }}"
+          TEST_FILE="test.txt"
+          REPO="my-maven-repo"
+
+          echo "Nexus Connection Test" > $TEST_FILE
+
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -u "$NEXUS_USER:$NEXUS_PASS" \
+            --upload-file $TEST_FILE "$NEXUS_URL/repository/$REPO/test.txt")
+
+          if [ "$RESPONSE" -ne 201 ]; then
+            echo "❌ Failed to upload test file to Nexus!"
+            exit 1
+          fi
+          echo "✅ Successfully uploaded test file to Nexus"
+
+      - name: Cleanup Test File (Optional)
+        run: rm -f test.txt
